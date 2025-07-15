@@ -1,46 +1,11 @@
-import { NextFunction, Request, Response, Router } from 'express';
-import { JwtPayload } from 'jsonwebtoken';
-import { envVars } from '../../config/env';
-import AppError from '../../errorHelpers/AppError';
+import { Router } from 'express';
+import { checkAuth } from '../../middlewares/checkAuth';
 import validateRequst from '../../middlewares/validateRequst';
-import { verifyToken } from '../../utils/jwt';
 import { UserControllers } from './user.controller';
+import { Role } from './user.interface';
 import { createUserZodSchema } from './user.validation';
 
 const router = Router();
-
-const checkAuth =
-    (...authRoles: string[]) =>
-    async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const accessToken = req.headers.authorization;
-
-            if (!accessToken) {
-                throw new AppError(403, 'No Token Recieved');
-            }
-
-            // const verifiedToken = jwt.verify(accessToken, 'secretOrPrivateKey');
-
-            const verifiedToken = verifyToken(
-                accessToken,
-                envVars.JWT_ACCESS_TOKEN_SECRET
-            ) as JwtPayload;
-
-            if (!verifiedToken) {
-                throw new AppError(403, 'You are not Authorized');
-            }
-
-            if (authRoles.includes(verifiedToken.role)) {
-                throw new AppError(
-                    403,
-                    'You are not Permited to view this route!!!'
-                );
-            }
-            next();
-        } catch (error) {
-            next(error);
-        }
-    };
 
 router.post(
     '/register',
@@ -48,9 +13,15 @@ router.post(
     UserControllers.createUser
 );
 
+router.patch(
+    '/:id',
+    checkAuth(...Object.values(Role)),
+    UserControllers.updateUser
+);
+
 router.get(
     '/all-users',
-    checkAuth('ADMIN', 'SUPER_ADMIN'),
+    checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
     UserControllers.getAllUsers
 );
 

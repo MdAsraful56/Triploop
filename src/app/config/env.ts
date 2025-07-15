@@ -9,6 +9,8 @@ interface EnvConfig {
     JWT_ACCESS_TOKEN_SECRET: string;
     JWT_ACCESS_EXPIRATION_TIME: string;
     BCRYPT_SALT_ROUNDS: string;
+    SUPER_ADMIN_EMAIL: string;
+    SUPER_ADMIN_PASSWORD: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -19,6 +21,8 @@ const loadEnvVariables = (): EnvConfig => {
         'JWT_ACCESS_TOKEN_SECRET',
         'JWT_ACCESS_EXPIRATION_TIME',
         'BCRYPT_SALT_ROUNDS',
+        'SUPER_ADMIN_EMAIL',
+        'SUPER_ADMIN_PASSWORD',
     ];
 
     requiredEnvVariables.forEach((key) => {
@@ -34,6 +38,8 @@ const loadEnvVariables = (): EnvConfig => {
         JWT_ACCESS_EXPIRATION_TIME: process.env
             .JWT_ACCESS_EXPIRATION_TIME as string,
         BCRYPT_SALT_ROUNDS: process.env.BCRYPT_SALT_ROUNDS as string,
+        SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL as string,
+        SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD as string,
     };
 };
 

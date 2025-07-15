@@ -37,6 +37,34 @@ const createUser = catchAsync(
     }
 );
 
+//update user
+const updateUser = catchAsync(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = req.params.id;
+        // const token = req.headers.authorization;
+        // const verifiedToken = verifyToken(
+        //     token as string,
+        //     envVars.JWT_ACCESS_TOKEN_SECRET
+        // ) as JwtPayload;
+        const verifiedToken = req.user;
+        const payload = req.body;
+
+        const user = await UserService.updateUser(
+            userId,
+            payload,
+            verifiedToken
+        );
+
+        sendResponse(res, {
+            success: true,
+            statusCode: httpStatus.CREATED,
+            message: 'User Update Successfully',
+            data: user,
+        });
+    }
+);
+
 const getAllUsers = catchAsync(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (req: Request, res: Response, next: NextFunction) => {
@@ -60,5 +88,6 @@ const getAllUsers = catchAsync(
 
 export const UserControllers = {
     createUser,
+    updateUser,
     getAllUsers,
 };
