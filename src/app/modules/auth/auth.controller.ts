@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status-codes';
 import { JwtPayload } from 'jsonwebtoken';
+import passport from 'passport';
 import { envVars } from '../../config/env';
 import AppError from '../../errorHelpers/AppError';
 import catchAsync from '../../utils/catchAsync';
@@ -10,19 +11,57 @@ import { createUserTokens } from '../../utils/userTokens';
 import { IUser } from '../user/user.interface';
 import { AuthServices } from './auth.service';
 
+// using local way
+// const credentialsLogin = catchAsync(
+//     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//     async (req: Request, res: Response, next: NextFunction) => {
+//         const loginInfo = await AuthServices.credentialsLogin(req.body);
+
+//         setAuthCookies(res, loginInfo);
+
+//         sendResponse(res, {
+//             success: true,
+//             statusCode: httpStatus.OK,
+//             message: 'User login  Successfully',
+//             data: loginInfo,
+//         });
+//     }
+// );
+
+// using passport local way
 const credentialsLogin = catchAsync(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async (req: Request, res: Response, next: NextFunction) => {
-        const loginInfo = await AuthServices.credentialsLogin(req.body);
+        passport.authenticate(
+            'local',
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            async (error: any, user: any, info: any) => {
+                if (error) {
+                    return next(new AppError(401, error));
+                }
 
-        setAuthCookies(res, loginInfo);
+                if (!user) {
+                    return next(new AppError(401, info.message));
+                }
 
-        sendResponse(res, {
-            success: true,
-            statusCode: httpStatus.OK,
-            message: 'User login  Successfully',
-            data: loginInfo,
-        });
+                const userToken = await createUserTokens(user);
+
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { password, ...rest } = user.toObject();
+
+                setAuthCookies(res, userToken);
+
+                sendResponse(res, {
+                    success: true,
+                    statusCode: httpStatus.OK,
+                    message: 'User login  Successfully',
+                    data: {
+                        accessToken: userToken.accessToken,
+                        refreshToken: userToken.refreshToken,
+                        user: rest,
+                    },
+                });
+            }
+        )(req, res, next);
     }
 );
 
