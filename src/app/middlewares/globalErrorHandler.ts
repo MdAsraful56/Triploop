@@ -1,6 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { envVars } from '../config/env';
 import AppError from '../errorHelpers/AppError';
+import handleCastError from '../helpers/handleCastError';
+import handlerDuplicateError from '../helpers/handlerDuplicateError';
+import handleValidationError from '../helpers/handleValidationError';
+import handleZodError from '../helpers/handleZodError';
 
 export const globalErrorHandler = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -13,8 +17,7 @@ export const globalErrorHandler = (
     let statusCode = 500;
     let message = `Something went wrong: ${err.message}`;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const errorSources: any = [
+    const errorSources: { path: string; message: string }[] = [
         // {
         //     path: 'isDeleted',
         //     message: 'Cast Failed',
@@ -23,41 +26,32 @@ export const globalErrorHandler = (
 
     //duplicate error
     if (err.code === 11000) {
-        const matchedArray = err.message.match(/"([^"]*)"/);
-        statusCode = 400;
-        message = `${matchedArray[1]} already exists`;
+        const simplifiedError = handlerDuplicateError(err);
+        statusCode = simplifiedError.statusCode;
+        message = simplifiedError.message;
     }
+
     // Object Id Cast error
     else if (err.name === 'CastError') {
-        statusCode = 400;
-        message = `Invalid ${err.path}: ${err.value}. Please provide a valid ${err.path}.`;
+        const simplifiedError = handleCastError(err);
+        statusCode = simplifiedError.statusCode;
+        message = simplifiedError.message;
     }
+
     // Zod validation error
     else if (err.name === 'ZodError') {
-        statusCode = 400;
-        message = 'Zod Validation error occurred. Please check your input.';
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        err.issues.forEach((issue: any) => {
-            errorSources.push({
-                path: issue.path[issue.path.length - 1], // Get the last part of the path
-                message: issue.message,
-            });
-        });
+        const simplifiedError = handleZodError(err);
+        statusCode = simplifiedError.statusCode;
+        message = simplifiedError.message;
+        errorSources.push(...(simplifiedError.errorSources || []));
     }
+
     // validation error
     else if (err.name === 'ValidationError') {
-        statusCode = 400;
-        const errors = Object.values(err.errors);
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        errors.forEach((errorObject: any) =>
-            errorSources.push({
-                path: errorObject.path,
-                message: errorObject.message,
-            })
-        );
-        message = 'Validation error occurred. Please check your input.';
+        const simplifiedError = handleValidationError(err);
+        statusCode = simplifiedError.statusCode;
+        errorSources.push(...(simplifiedError.errorSources || []));
+        message = simplifiedError.message;
     } else if (err instanceof AppError) {
         statusCode = err.statusCode;
         message = err.message;
@@ -67,7 +61,7 @@ export const globalErrorHandler = (
         success: false,
         message,
         errorSources,
-        error: err,
+        err: envVars.NODE_ENV === 'development' ? err : null,
         stack: envVars.NODE_ENV === 'development' ? err.stack : null,
     });
 };
