@@ -16,4 +16,4 @@ const bookingSchema = new Schema<IBooking>(
     { timestamps: true }
 );
 
-export const Boking = model<IBooking>('Booking', bookingSchema);
+export const Booking = model<IBooking>('Booking', bookingSchema);
