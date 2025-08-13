@@ -1,6 +1,6 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express, { Request, Response } from 'express';
+import express, { Request, Response, urlencoded } from 'express';
 import expressSession from 'express-session';
 import passport from 'passport';
 import { envVars } from './app/config/env';
@@ -23,6 +23,7 @@ app.use(passport.session());
 
 app.use(cookieParser());
 app.use(express.json());
+app.use(urlencoded());
 app.use(cors());
 
 app.use('/api/v1', router);

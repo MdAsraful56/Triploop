@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { checkAuth } from '../../middlewares/checkAuth';
 
+import { multerUpload } from '../../config/multer.config';
 import validateRequst from '../../middlewares/validateRequst';
 import { Role } from '../user/user.interface';
 import { DivisionController } from './division.controller';
@@ -14,6 +15,7 @@ const router = Router();
 router.post(
     '/create',
     checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+    multerUpload.single('file'),
     validateRequst(createDivisionSchema),
     DivisionController.createDivision
 );
