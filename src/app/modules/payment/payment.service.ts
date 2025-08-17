@@ -3,8 +3,8 @@ import httpStatus from 'http-status-codes';
 import AppError from '../../errorHelpers/AppError';
 import { BookingStatus } from '../booking/booking.interface';
 import { Booking } from '../booking/booking.model';
-import { ISSLCommerz } from '../sslCommerz/sslCommerz.interface';
-import { SSLService } from '../sslCommerz/sslCommerz.service';
+import { ISSLCommerz } from '../SSLCommerz/SSLCommerz.interface';
+import { SSLService } from '../SSLCommerz/SSLCommerz.service';
 import { PaymentStatus } from './payment.interface';
 import { Payment } from './payment.model';
 

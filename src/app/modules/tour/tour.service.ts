@@ -56,18 +56,6 @@ const updateTour = async (id: string, payload: Partial<ITour>) => {
         throw new Error('Tour not found.');
     }
 
-    // if (payload.title) {
-    //     const baseSlug = payload.title.toLowerCase().split(" ").join("-")
-    //     let slug = `${baseSlug}`
-
-    //     let counter = 0;
-    //     while (await Tour.exists({ slug })) {
-    //         slug = `${slug}-${counter++}` // dhaka-division-2
-    //     }
-
-    //     payload.slug = slug
-    // }
-
     if (
         payload.images &&
         payload.images.length > 0 &&
@@ -134,13 +122,15 @@ const createTourType = async (payload: ITourType) => {
     if (existingTourType) {
         throw new Error('Tour type already exists.');
     }
+    // console.log({ name: payload.name });
 
-    return await TourType.create({ name });
+    return await TourType.create({ name: payload.name });
 };
 
 const getAllTourTypes = async () => {
     return await TourType.find();
 };
+
 const updateTourType = async (id: string, payload: ITourType) => {
     const existingTourType = await TourType.findById(id);
     if (!existingTourType) {
@@ -152,6 +142,7 @@ const updateTourType = async (id: string, payload: ITourType) => {
     });
     return updatedTourType;
 };
+
 const deleteTourType = async (id: string) => {
     const existingTourType = await TourType.findById(id);
     if (!existingTourType) {
