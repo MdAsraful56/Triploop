@@ -47,6 +47,9 @@ const deleteTour = catchAsync(async (req: Request, res: Response) => {
         data: result,
     });
 });
+
+/// tour type start
+
 const getAllTourTypes = catchAsync(async (req: Request, res: Response) => {
     const result = await TourService.getAllTourTypes();
     sendResponse(res, {

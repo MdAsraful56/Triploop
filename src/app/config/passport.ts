@@ -41,7 +41,7 @@ passport.use(
 
                 if (!isPasswordMatched) {
                     return done(null, false, {
-                        message: 'Password dose not match',
+                        message: 'Password does not match',
                     });
                 }
 
