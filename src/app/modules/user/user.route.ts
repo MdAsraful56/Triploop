@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { multerUpload } from '../../config/multer.config';
 import { checkAuth } from '../../middlewares/checkAuth';
 import validateRequst from '../../middlewares/validateRequst';
 import { UserControllers } from './user.controller';
@@ -17,6 +18,7 @@ router.patch(
     '/:id',
     validateRequst(updateUserZodSchema),
     checkAuth(...Object.values(Role)),
+    multerUpload.single('file'),
     UserControllers.updateUser
 );
 
